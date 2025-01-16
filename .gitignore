@@ -7,6 +7,7 @@
 *chunk_*.txt
 *.chroma
 *.pytest_cache
+*.python-version
 *models
 *data
 !chapter1_transformer_interp/exercises/part42_function_vectors_and_model_steering/data
