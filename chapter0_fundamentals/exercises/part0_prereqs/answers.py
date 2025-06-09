@@ -23,3 +23,23 @@ from part0_prereqs.utils import display_array_as_img, display_soln_array_as_img
 MAIN = __name__ == "__main__"
 
 arr = np.load(section_dir / "numbers.npy")
+
+print(arr.shape)
+
+print(arr[0].shape)
+display_array_as_img(arr[0])  # plotting the first image in the batch
+
+print(arr[0, 0].shape)
+display_array_as_img(arr[0, 0])  # plotting the first channel of the first image, as monochrome
+
+arr_stacked = einops.rearrange(arr, "b c h w -> c h (b w)")
+print(arr_stacked.shape)
+display_array_as_img(arr_stacked)  # plotting all images, stacked in a row
+
+
+arr_stacked_v = einops.rearrange(arr, "b c h w -> c (b h) w")
+display_array_as_img(arr_stacked_v)  # plotting all images, stacked in a column
+
+
+arr_stacked_b = einops.rearrange(arr, "(b1 b2) c h w -> c (b1 h) (b2 w)", b1 = 2)
+display_array_as_img(arr_stacked_b)  # plotting all images, stacked in a block
