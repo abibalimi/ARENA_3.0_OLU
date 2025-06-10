@@ -49,6 +49,12 @@ arr_stacked_b = einops.rearrange(arr, "(b1 b2) c h w -> c (b1 h) (b2 w)", b1 = 2
 display_array_as_img(arr_stacked_b)  # plotting all images, stacked in a block
 
 ## Exercises - einops operations (match images)
+## Difficulty: 🔴🔴🔴⚪⚪
+## Importance: 🔵🔵⚪⚪⚪
+## You should spend up to ~45 minutes on these exercises collectively.
+## If you think you get the general idea, then you can skip to the next section.
+## You shouldn't spend longer than ~10 mins per exercise.
+
 ### (1) Column stacking
 arr1 = einops.rearrange(arr, "b c h w -> c (b h) w")
 display_array_as_img(arr1)  # plotting all images, stacked in a column
@@ -92,3 +98,55 @@ display_array_as_img(arr7)
 #### each pixel value in the output is the maximum of the corresponding 2x2 square in the original image.
 arr8 = einops.reduce(arr, "(b1 b2) c (h h1) (w w1) -> c (b1 h) (b2 w)", "max", b1=2, h1=2, w1=2)
 display_array_as_img(arr8)
+
+
+
+## Exercises - einops operations & broadcasting
+## Difficulty: 🔴🔴⚪⚪⚪
+## Importance: 🔵🔵🔵⚪⚪
+## You should spend up to ~45 minutes on these exercises collectively.
+## These are more representative of the kinds of einops operations you'll use in practice.
+
+def assert_all_equal(actual: Tensor, expected: Tensor) -> None:
+    assert actual.shape == expected.shape, f"Shape mismatch, got: {actual.shape}"
+    assert (actual == expected).all(), f"Value mismatch, got: {actual}"
+    print("Tests passed!")
+
+
+def assert_all_close(actual: Tensor, expected: Tensor, atol=1e-3) -> None:
+    assert actual.shape == expected.shape, f"Shape mismatch, got: {actual.shape}"
+    t.testing.assert_close(actual, expected, atol=atol, rtol=0.0)
+    print("Tests passed!")
+    
+### (A1) rearrange
+#### We'll start with a simple rearrange operation -
+#### you're asked to return a particular tensor using only t.arange and einops.rearrange.
+#### The t.arange function is similar to the numpy equivalent:
+#### torch.arange(start, end) will return a 1D tensor containing all the values from start to end - 1 inclusive.
+def rearrange_1() -> Tensor:
+    """Return the following tensor using only t.arange and einops.rearrange:
+
+    [[3, 4],
+     [5, 6],
+     [7, 8]]
+    """
+    tsr = t.arange(3, 9)
+    return einops.rearrange(tsr, "(a b) -> a b", a=3, b=2)
+
+
+expected = t.tensor([[3, 4], [5, 6], [7, 8]])
+assert_all_equal(rearrange_1(), expected)
+
+
+### (A2) rearrange
+#### This exercise has the same pattern as the previous one.
+def rearrange_2() -> Tensor:
+    """Return the following tensor using only t.arange and einops.rearrange:
+
+    [[1, 2, 3],
+     [4, 5, 6]]
+    """
+    return einops.rearrange(t.arange(1, 7), " (h w) -> h w", h=2, w=3)
+
+
+assert_all_equal(rearrange_2(), t.tensor([[1, 2, 3], [4, 5, 6]]))
