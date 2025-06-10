@@ -133,7 +133,6 @@ def rearrange_1() -> Tensor:
     tsr = t.arange(3, 9)
     return einops.rearrange(tsr, "(a b) -> a b", a=3, b=2)
 
-
 expected = t.tensor([[3, 4], [5, 6], [7, 8]])
 assert_all_equal(rearrange_1(), expected)
 
@@ -146,7 +145,66 @@ def rearrange_2() -> Tensor:
     [[1, 2, 3],
      [4, 5, 6]]
     """
-    return einops.rearrange(t.arange(1, 7), " (h w) -> h w", h=2, w=3)
-
+    return einops.rearrange(t.arange(1, 7), "(h w) -> h w", h=2, w=3)
 
 assert_all_equal(rearrange_2(), t.tensor([[1, 2, 3], [4, 5, 6]]))
+
+
+
+### (B1) temperature average
+#### Here you're given a 1D tensor containing temperatures for each day.
+#### You should return a 1D tensor containing the average temperature for each week.
+#### This could be done in 2 separate operations (a reshape from 1D to 2D followed by taking the mean over one of the axes),
+#### however we encourage you to try and find a solution with einops.reduce in just a single line.
+def temperatures_average(temps: Tensor) -> Tensor:
+    """Return the average temperature for each week.
+
+    temps: a 1D temperature containing temperatures for each day.
+    Length will be a multiple of 7 and the first 7 days are for the first week, second 7 days for the second week, etc.
+
+    You can do this with a single call to reduce.
+    """
+    assert len(temps) % 7 == 0
+    return einops.reduce(temps, "(w 7) -> w","mean")
+
+temps = t.tensor([71, 72, 70, 75, 71, 72, 70, 75, 80, 85, 80, 78, 72, 83]).float()
+expected = [71.571, 79.0]
+assert_all_close(temperatures_average(temps), t.tensor(expected))
+
+
+### (B2) temperature difference
+#### Here, we're asking you to subtract the average temperature from each week from the daily temperatures.
+#### You'll have to be careful of broadcasting here, since your temperatures tensor has shape (14,)
+#### while your average temperature computed above has shape (2,) - these are not broadcastable.
+def temperatures_differences(temps: Tensor) -> Tensor:
+    """For each day, subtract the average for the week the day belongs to.
+
+    temps: as above
+    """
+    assert len(temps) % 7 == 0
+    avg = temperatures_average(temps)  # avg = einops.reduce(temps, "(w 7) -> w","mean")
+    return temps - einops.repeat(avg, "w -> (w 7)")
+
+expected = [-0.571, 0.429, -1.571, 3.429, -0.571, 0.429, -1.571, -4.0, 1.0, 6.0, 1.0, -1.0, -7.0, 4.0]
+actual = temperatures_differences(temps)
+assert_all_close(actual, t.tensor(expected))
+
+
+### (B3) temperature normalized
+#### Lastly, you need to subtract the average and divide by the standard deviation. 
+#### Note that you can pass t.std into the einops.reduce function to return the std dev of the values you're reducing over.
+def temperatures_normalized(temps: Tensor) -> Tensor:
+    """For each day, subtract the weekly average and divide by the weekly standard deviation.
+
+    temps: as above
+
+    Pass t.std to reduce.
+    """
+    avg = einops.reduce(temps, "(w 7) -> w", "mean")
+    std = einops.reduce(temps, "(w 7) -> w", t.std)
+    diff = temps - einops.repeat(avg, "w -> (w 7)")
+    return diff / einops.repeat(std, "w -> (w 7)")
+
+expected = [-0.333, 0.249, -0.915, 1.995, -0.333, 0.249, -0.915, -0.894, 0.224, 1.342, 0.224, -0.224, -1.565, 0.894]
+actual = temperatures_normalized(temps)
+assert_all_close(actual, t.tensor(expected))
