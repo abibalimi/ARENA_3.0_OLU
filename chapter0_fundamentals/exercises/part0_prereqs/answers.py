@@ -68,3 +68,27 @@ display_array_as_img(arr3)
 #### The image below was stretched vertically by a factor of 2.
 arr4 = einops.repeat(arr[0], "c h w -> c (h 2) w")
 display_array_as_img(arr4)
+
+### (5) Split channels
+#### The image below was created by splitting out the 3 channels of the image (i.e. red, green, blue) 
+#### and turning these into 3 stacked horizontal images. 
+#### The output is 2D (the display function interprets this as a monochrome image).
+arr5 = einops.rearrange(arr[0], "c h w -> h (c w)")
+display_array_as_img(arr5)
+
+### (6) Stack into rows & cols
+#### This requires a rearrange operation with dimensions for row and column stacking.
+arr6 = einops.rearrange(arr, "(b1 b2) c h w -> c (b1 h) (b2 w)", b1=2)
+display_array_as_img(arr6)
+
+### (7) Transpose
+#### Here, we've just flipped the model's horizontal and vertical dimensions. 
+#### Transposing is a fairly common tensor operation.
+arr7 = einops.rearrange(arr[1], "c h w -> c w h")
+display_array_as_img(arr7)
+
+### (8) Shrinking
+#### Hint - for this one, you should use max pooling - i.e. 
+#### each pixel value in the output is the maximum of the corresponding 2x2 square in the original image.
+arr8 = einops.reduce(arr, "(b1 b2) c (h h1) (w w1) -> c (b1 h) (b2 w)", "max", b1=2, h1=2, w1=2)
+display_array_as_img(arr8)
