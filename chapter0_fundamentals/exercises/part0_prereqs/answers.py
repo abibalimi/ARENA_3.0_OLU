@@ -208,3 +208,48 @@ def temperatures_normalized(temps: Tensor) -> Tensor:
 expected = [-0.333, 0.249, -0.915, 1.995, -0.333, 0.249, -0.915, -0.894, 0.224, 1.342, 0.224, -0.224, -1.565, 0.894]
 actual = temperatures_normalized(temps)
 assert_all_close(actual, t.tensor(expected))
+
+
+### (C1) normalize a matrix
+#### Here, we're asking you to normalize the rows of a matrix so that each row has L2 norm (sum of squared values) equal to 1.
+#### Note - L2 norm and standard deviation are not the same thing; L2 norm leaves out the averaging over size of vector step.
+#### We recommend you try and use the torch function t.norm directly rather than einops for this task.
+#### Two useful things we should highlight here:
+#### Most PyTorch functions like t.norm(tensor, ...) which operate on a single tensor are also tensor methods, i.e.
+#### they can be used as tensor.norm(...) with the same arguments.
+#### Most PyTorch dimensionality-reducing functions have the keepdim argument,
+#### which is false by default but will cause your output tensor to keep dummy dimensions if set to true.
+#### For example, if tensor has shape (3, 4) then tensor.sum(dim=1) has shape (3,) but tensor.sum(dim=1, keepdim=True) has shape (3, 1).
+def normalize_rows(matrix: Tensor) -> Tensor:
+    """Normalize each row of the given 2D matrix.
+
+    matrix: a 2D tensor of shape (m, n).
+
+    Returns: a tensor of the same shape where each row is divided by its l2 norm.
+    """
+    row_norms = matrix.norm(dim=1, keepdim=True)
+    return matrix / row_norms
+
+matrix = t.tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9]]).float()
+expected = t.tensor([[0.267, 0.535, 0.802], [0.456, 0.570, 0.684], [0.503, 0.574, 0.646]])
+assert_all_close(normalize_rows(matrix), expected)
+
+
+### (C2) pairwise cosine similarity
+#### Now, you should compute a matrix of shape (m, m)
+#### where out[i, j] is the cosine similarity between the i-th and j-th rows of matrix.
+#### The cosine similarity between two vectors is given by summing the elementwise products of the normalized vectors.
+#### We haven't covered einsum yet, but you should be able to get this working using normal elementwise multiplication
+#### and summing (or even do this in one step - can you see how?).
+def cos_sim_matrix(matrix: Tensor) -> Tensor:
+    """Return the cosine similarity matrix for each pair of rows of the given matrix.
+
+    matrix: shape (m, n)
+    """
+    normalized_matrix = normalize_rows(matrix)
+    return normalized_matrix @ normalized_matrix.T
+
+
+matrix = t.tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9]]).float()
+expected = t.tensor([[1.0, 0.975, 0.959], [0.975, 1.0, 0.998], [0.959, 0.998, 1.0]])
+assert_all_close(cos_sim_matrix(matrix), expected)
