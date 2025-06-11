@@ -243,14 +243,13 @@ assert_all_close(normalize_rows(matrix), expected)
 #### and summing (or even do this in one step - can you see how?).
 def cos_sim_matrix(matrix: Tensor) -> Tensor:
     """Return the cosine similarity matrix for each pair of rows of the given matrix.
+    The reason this solution works is that matrix_normalized @ matrix_normalized.T multiplies along the columns of matrix_normalized 
+    and the rows of matrix_normalized.T then sums the output - in other words, it computes the dot products!
 
     matrix: shape (m, n)
     """
-    matrix_normalized = normalize_rows(matrix)
-    left_matrix = matrix_normalized.unsqueeze(-1)  # shape (m, n, 1)
-    right_matrix = matrix_normalized.T.unsqueeze(0)  # shape (1, n, m)
-    products = left_matrix * right_matrix  # shape (m, n, m)
-    return products.sum(dim=1)  # shape (m, m)
+    normalized_matrix = normalize_rows(matrix)
+    return normalized_matrix @ normalized_matrix.T
 
 matrix = t.tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9]]).float()
 expected = t.tensor([[1.0, 0.975, 0.959], [0.975, 1.0, 0.998], [0.959, 0.998, 1.0]])
