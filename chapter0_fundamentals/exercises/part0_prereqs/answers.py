@@ -246,9 +246,11 @@ def cos_sim_matrix(matrix: Tensor) -> Tensor:
 
     matrix: shape (m, n)
     """
-    normalized_matrix = normalize_rows(matrix)
-    return normalized_matrix @ normalized_matrix.T
-
+    matrix_normalized = normalize_rows(matrix)
+    left_matrix = matrix_normalized.unsqueeze(-1)  # shape (m, n, 1)
+    right_matrix = matrix_normalized.T.unsqueeze(0)  # shape (1, n, m)
+    products = left_matrix * right_matrix  # shape (m, n, m)
+    return products.sum(dim=1)  # shape (m, m)
 
 matrix = t.tensor([[1, 2, 3], [4, 5, 6], [7, 8, 9]]).float()
 expected = t.tensor([[1.0, 0.975, 0.959], [0.975, 1.0, 0.998], [0.959, 0.998, 1.0]])
