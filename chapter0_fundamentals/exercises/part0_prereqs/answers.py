@@ -322,7 +322,7 @@ def total_price_indexing(prices: Tensor, items: Tensor) -> float:
 
     https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing
     """
-    return t.gather(input=prices, dim=0, index=items).sum()
+    return prices[items].sum().item()
 
 prices = t.tensor([0.5, 1, 1.5, 2, 2.5])
 items = t.tensor([0, 0, 1, 1, 4, 3, 2])
