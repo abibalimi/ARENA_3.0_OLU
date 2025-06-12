@@ -364,3 +364,17 @@ assert_all_equal(gather_2d(matrix, indexes), expected)
 indexes2 = t.tensor([[2, 4], [1, 3], [0, 2]])
 expected2 = t.tensor([[2, 4], [6, 8], [10, 12]])
 assert_all_equal(gather_2d(matrix, indexes2), expected2)
+
+
+
+### (F3) total price gather
+def total_price_gather(prices: Tensor, items: Tensor) -> float:
+    """Compute the same as total_price_indexing, but use torch.gather."""
+    assert items.max() < prices.shape[0]
+    return prices.gather(0,items).sum().item()
+
+
+prices = t.tensor([0.5, 1, 1.5, 2, 2.5])
+items = t.tensor([0, 0, 1, 1, 4, 3, 2])
+assert total_price_gather(prices, items) == 9.0
+print("Tests passed!")
