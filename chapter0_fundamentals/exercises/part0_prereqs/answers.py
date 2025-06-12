@@ -278,3 +278,30 @@ n = 5_000_000
 probs = t.tensor([0.05, 0.1, 0.1, 0.2, 0.15, 0.4])
 freqs = t.bincount(sample_distribution(probs, n)) / n
 assert_all_close(freqs, probs)
+
+
+
+### (E) classifier accuracy
+#### Here, we're asking you to compute the accuracy of a classifier. scores is a tensor of shape (batch, n_classes)
+#### where scores[b, i] is the score the classifier gave to class i for input b, and true_classes is a tensor of shape (batch,)
+#### where true_classes[b] is the true class for input b.
+#### We want you to return the fraction of times the maximum score is equal to the true class.
+#### You can use the torch function t.argmax, it works as follows:
+#### tensor.argmax(dim) will return a tensor of the index containing the maximum value along the dimension dim
+#### (i.e. the shape of this output will be the same as the shape of tensor except for the dimension dim).
+def classifier_accuracy(scores: Tensor, true_classes: Tensor) -> Tensor:
+    """Return the fraction of inputs for which the maximum score corresponds to the true class for that input.
+
+    scores: shape (batch, n_classes). A higher score[b, i] means that the classifier thinks class i is more likely.
+    true_classes: shape (batch, ). true_classes[b] is an integer from [0...n_classes).
+
+    Use t.argmax.
+    """
+    max_idx = t.argmax(scores, dim=1)
+    return (max_idx == true_classes).sum() / len(true_classes)  # (scores.argmax(dim=1) == true_classes).float().mean()
+
+scores = t.tensor([[0.75, 0.5, 0.25], [0.1, 0.5, 0.4], [0.1, 0.7, 0.2]])
+true_classes = t.tensor([0, 1, 0])
+expected = 2.0 / 3.0
+assert classifier_accuracy(scores, true_classes) == expected
+print("Tests passed!")
