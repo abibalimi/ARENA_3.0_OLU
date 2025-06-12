@@ -305,3 +305,26 @@ true_classes = t.tensor([0, 1, 0])
 expected = 2.0 / 3.0
 assert classifier_accuracy(scores, true_classes) == expected
 print("Tests passed!")
+
+
+
+### (F1) total price indexing
+#### The next few exercises involve indexing, often using the torch.gather function. You can read about it in the docs.
+#### If you find gather confusing, an alternative is the eindex library, which was designed to provide indexing features motivated by how einops works.
+#### You can read more about that here, and as a suggested bonus you can try implementing / rewriting the next few functions using eindex.
+def total_price_indexing(prices: Tensor, items: Tensor) -> float:
+    """Given prices for each kind of item and a tensor of items purchased, return the total price.
+
+    prices: shape (k, ). prices[i] is the price of the ith item.
+    items: shape (n, ). A 1D tensor where each value is an item index from [0..k).
+
+    Use integer array indexing. The below document describes this for NumPy but it's the same in PyTorch:
+
+    https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing
+    """
+    return t.gather(input=prices, dim=0, index=items).sum()
+
+prices = t.tensor([0.5, 1, 1.5, 2, 2.5])
+items = t.tensor([0, 0, 1, 1, 4, 3, 2])
+assert total_price_indexing(prices, items) == 9.0
+print("Tests passed!")
