@@ -328,3 +328,38 @@ prices = t.tensor([0.5, 1, 1.5, 2, 2.5])
 items = t.tensor([0, 0, 1, 1, 4, 3, 2])
 assert total_price_indexing(prices, items) == 9.0
 print("Tests passed!")
+
+
+
+### (F2) gather 2D
+def gather_2d(matrix: Tensor, indexes: Tensor) -> Tensor:
+    """Perform a gather operation along the second dimension.
+
+    matrix: shape (m, n)
+    indexes: shape (m, k)
+
+    Return: shape (m, k). out[i][j] = matrix[i][indexes[i][j]]
+
+    For this problem, the test already passes and it's your job to write at least three asserts relating the arguments and the output.
+    This is a tricky function and worth spending some time to wrap your head around its behavior.
+
+    See: https://pytorch.org/docs/stable/generated/torch.gather.html?highlight=gather#torch.gather
+    """
+    # YOUR CODE HERE - add assert statement(s) here for `indices` and `matrix`
+    assert matrix.shape[0] == indexes.shape[0], f"Shape[0] mismatch, got: {matrix.shape[0] = } and {indexes.shape[0] = }"
+    
+
+    out = matrix.gather(1, indexes)
+    # YOUR CODE HERE - add assert statement(s) here for `out`
+    assert out.shape == indexes.shape, f"Shape mismatch, got: {out.shape = } and {indexes.shape = }"
+
+    return out
+
+matrix = t.arange(15).view(3, 5)
+indexes = t.tensor([[4], [3], [2]])
+expected = t.tensor([[4], [8], [12]])
+assert_all_equal(gather_2d(matrix, indexes), expected)
+
+indexes2 = t.tensor([[2, 4], [1, 3], [0, 2]])
+expected2 = t.tensor([[2, 4], [6, 8], [10, 12]])
+assert_all_equal(gather_2d(matrix, indexes2), expected2)
