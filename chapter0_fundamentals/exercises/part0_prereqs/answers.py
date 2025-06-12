@@ -346,7 +346,8 @@ def gather_2d(matrix: Tensor, indexes: Tensor) -> Tensor:
     See: https://pytorch.org/docs/stable/generated/torch.gather.html?highlight=gather#torch.gather
     """
     # YOUR CODE HERE - add assert statement(s) here for `indices` and `matrix`
-    assert matrix.shape[0] == indexes.shape[0], f"Shape[0] mismatch, got: {matrix.shape[0] = } and {indexes.shape[0] = }"
+    assert matrix.ndim == indexes.ndim, f"Dimension mismatch, got: {matrix.ndim = } and {indexes.ndim = }"
+    assert indexes.shape[0] <= matrix.shape[0], f"Shape mismatch: {indexes.shape[0] = } must be <= to {matrix.shape[0] = }"
     
 
     out = matrix.gather(1, indexes)
