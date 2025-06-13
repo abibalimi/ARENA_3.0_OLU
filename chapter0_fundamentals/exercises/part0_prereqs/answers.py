@@ -369,7 +369,7 @@ assert_all_equal(gather_2d(matrix, indexes2), expected2)
 
 ### (F3) total price gather
 def total_price_gather(prices: Tensor, items: Tensor) -> float:
-    """Compute the same as total_price_indexing, but use torch.gather."""
+    """Compute the same as total_price_indexing, but use torch.gather. """
     assert items.max() < prices.shape[0]
     return prices.gather(0,items).sum().item()
 
@@ -378,3 +378,30 @@ prices = t.tensor([0.5, 1, 1.5, 2, 2.5])
 items = t.tensor([0, 0, 1, 1, 4, 3, 2])
 assert total_price_gather(prices, items) == 9.0
 print("Tests passed!")
+
+
+
+### (G) indexing
+def integer_array_indexing(matrix: Tensor, coords: Tensor) -> Tensor:
+    """Return the values at each coordinate using integer array indexing.
+
+    For details on integer array indexing, see:
+    https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing
+
+    matrix: shape (d_0, d_1, ..., d_n)
+    coords: shape (batch, n)
+
+    Return: (batch, )
+    """
+    return matrix[tuple(coords.T)] # matrix[tensor([0, 0, 1]), tensor([1, 4, 4])]
+
+
+mat_2d = t.arange(15).view(3, 5)
+coords_2d = t.tensor([[0, 1], [0, 4], [1, 4]])
+actual = integer_array_indexing(mat_2d, coords_2d)
+assert_all_equal(actual, t.tensor([1, 4, 9]))
+
+mat_3d = t.arange(2 * 3 * 4).view((2, 3, 4))
+coords_3d = t.tensor([[0, 0, 0], [0, 1, 1], [0, 2, 2], [1, 0, 3], [1, 2, 0]])
+actual = integer_array_indexing(mat_3d, coords_3d)
+assert_all_equal(actual, t.tensor([0, 5, 10, 15, 20]))
