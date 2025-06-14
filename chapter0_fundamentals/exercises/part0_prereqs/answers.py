@@ -467,3 +467,29 @@ assert actual2.min() >= 0.0
 assert actual2.max() <= 1.0
 assert_all_equal(actual2.argsort(), matrix2.argsort())
 assert_all_close(actual2.sum(dim=-1), t.ones(matrix2.shape[:-1]))
+
+
+
+### (H3) batched logsoftmax
+def batched_logsoftmax(matrix: Tensor) -> Tensor:
+    """Compute log(softmax(row)) for each row of the matrix.
+
+    matrix: shape (batch, n)
+
+    Return: (batch, n).
+
+    Do this without using PyTorch's logsoftmax function.
+    For each row, subtract the maximum first to avoid overflow if the row contains large values.
+    """
+    maxes = matrix.max(dim=-1, keepdim=True).values
+    # log_softmax(x) = log(softmax(x)) = x - log(sum(exp(x)))
+    X = matrix - maxes # subtract the maximum first
+    return X - X.exp().sum(dim=-1, keepdim=True).log()
+
+matrix = t.arange(1, 7).view((2, 3)).float()
+start = 1000
+matrix2 = t.arange(start + 1, start + 7).view((2, 3)).float()
+actual = batched_logsoftmax(matrix2)
+expected = t.tensor([[-2.4076, -1.4076, -0.4076],
+                     [-2.4076, -1.4076, -0.4076]])
+assert_all_close(actual, expected)
