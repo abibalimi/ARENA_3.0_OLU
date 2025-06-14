@@ -436,3 +436,34 @@ matrix2 = t.randn((10, 20))
 expected2 = t.logsumexp(matrix2, dim=-1)
 actual2 = batched_logsumexp(matrix2)
 assert_all_close(actual2, expected2)
+
+
+
+### (H2) batched softmax
+def batched_softmax(matrix: Tensor) -> Tensor:
+    """For each row of the matrix, compute softmax(row).
+
+    Do this without using PyTorch's softmax function.
+    Instead, use the definition of softmax: https://en.wikipedia.org/wiki/Softmax_function
+
+    matrix: shape (batch, n)
+
+    Return: (batch, n). For each i, out[i] should sum to 1.
+    """
+    expos = matrix.exp()
+    return expos / expos.sum(dim=-1, keepdim=True)
+
+
+matrix = t.arange(1, 6).view((1, 5)).float().log()
+expected = t.arange(1, 6).view((1, 5)) / 15.0
+actual = batched_softmax(matrix)
+assert_all_close(actual, expected)
+for i in [0.12, 3.4, -5, 6.7]:
+    assert_all_close(actual, batched_softmax(matrix + i))  # check it's translation-invariant
+
+matrix2 = t.rand((10, 20))
+actual2 = batched_softmax(matrix2)
+assert actual2.min() >= 0.0
+assert actual2.max() <= 1.0
+assert_all_equal(actual2.argsort(), matrix2.argsort())
+assert_all_close(actual2.sum(dim=-1), t.ones(matrix2.shape[:-1]))
