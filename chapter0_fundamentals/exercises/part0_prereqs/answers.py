@@ -493,3 +493,30 @@ actual = batched_logsoftmax(matrix2)
 expected = t.tensor([[-2.4076, -1.4076, -0.4076],
                      [-2.4076, -1.4076, -0.4076]])
 assert_all_close(actual, expected)
+
+
+
+### (H4) batched cross entropy loss
+def batched_cross_entropy_loss(logits: Tensor, true_labels: Tensor) -> Tensor:
+    """Compute the cross entropy loss for each example in the batch.
+
+    logits: shape (batch, classes). logits[i][j] is the unnormalized prediction for example i and class j.
+    true_labels: shape (batch, ). true_labels[i] is an integer index representing the true class for example i.
+
+    Return: shape (batch, ). out[i] is the loss for example i.
+
+    Hint: convert the logits to log-probabilities using your batched_logsoftmax from above.
+    Then the loss for an example is just the negative of the log-probability that the model assigned to the true class. Use torch.gather to perform the indexing.
+    """
+    assert logits.shape[0] == true_labels.shape[0]
+    assert true_labels.max() < logits.shape[1]
+    logprobs = batched_logsoftmax(logits) # convert the logits to log-probabilities
+    indices = einops.rearrange(true_labels, "n -> n 1")
+    pred_at_index = logprobs.gather(1, indices)
+    return -einops.rearrange(pred_at_index, "n 1 -> n")
+
+logits = t.tensor([[float("-inf"), float("-inf"), 0], [1 / 3, 1 / 3, 1 / 3], [float("-inf"), 0, 0]])
+true_labels = t.tensor([2, 0, 0])
+expected = t.tensor([0.0, math.log(3), float("inf")])
+actual = batched_cross_entropy_loss(logits, true_labels)
+assert_all_close(actual, expected)
