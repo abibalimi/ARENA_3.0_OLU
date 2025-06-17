@@ -559,3 +559,68 @@ column_indexes = t.tensor([0, 2, 1, 0])
 actual = collect_columns(matrix, column_indexes)
 expected = t.tensor([[0, 2, 1, 0], [3, 5, 4, 3], [6, 8, 7, 6], [9, 11, 10, 9], [12, 14, 13, 12]])
 assert_all_equal(actual, expected)
+
+
+
+# Einsum
+
+
+## Einsum is a very useful function for performing linear operations, which you'll probably be using a lot during this programme.
+
+## Note - we'll be using the einops.einsum version of the function, which works differently to the more conventional torch.einsum:
+## einops.einsum has the arrays as the first arguments, and uses spaces to separate dimensions in the string.
+## torch.einsum has the string as its first argument, and doesn't use spaces to separate dimensions (each dim is represented by a single character).
+## For instance, torch.einsum("ij,i->j", A, b) is equivalent to einops.einsum(A, b, "i j, i -> j"). 
+## (Note, einops doesn't care whether there are spaces either side of , and ->, so you don't need to match this syntax exactly.)
+
+## Exercices
+## Difficulty: 🔴🔴⚪⚪⚪
+## Importance: 🔵🔵🔵🔵⚪
+
+## You should spend up to 15-20 minutes on these exercises collectively.
+## If you think you get the general idea, then you can skip to the next section.
+
+## In the following exercises, you'll write simple functions using einsum which replicate the functionality of standard NumPy functions: 
+## trace, matrix multiplication, inner and outer products. We've also included some test functions which you should run.
+## Note - this version of einsum will require that you include ->, 
+## even if you're summing to a scalar (i.e. the right hand side of your string expression is empty).
+def einsum_trace(mat: np.ndarray):
+    """
+    Returns the same as `np.trace`.
+    """
+    return einops.einsum(mat, 'i i -> ')
+
+
+def einsum_mv(mat: np.ndarray, vec: np.ndarray):
+    """
+    Returns the same as `np.matmul`, when `mat` is a 2D array and `vec` is 1D.
+    """
+    return einops.einsum(mat, vec, 'i j, j -> i')
+
+
+def einsum_mm(mat1: np.ndarray, mat2: np.ndarray):
+    """
+    Returns the same as `np.matmul`, when `mat1` and `mat2` are both 2D arrays.
+    """
+    return einops.einsum(mat1, mat2, 'i k, k j -> i j')
+
+
+def einsum_inner(vec1: np.ndarray, vec2: np.ndarray):
+    """
+    Returns the same as `np.inner`.
+    """
+    return einops.einsum(vec1, vec2, 'i, i -> ')
+
+
+def einsum_outer(vec1: np.ndarray, vec2: np.ndarray):
+    """
+    Returns the same as `np.outer`.
+    """
+    return einops.einsum(vec1, vec2, 'i, j -> i j')
+
+
+tests.test_einsum_trace(einsum_trace)
+tests.test_einsum_mv(einsum_mv)
+tests.test_einsum_mm(einsum_mm)
+tests.test_einsum_inner(einsum_inner)
+tests.test_einsum_outer(einsum_outer)
