@@ -520,3 +520,42 @@ true_labels = t.tensor([2, 0, 0])
 expected = t.tensor([0.0, math.log(3), float("inf")])
 actual = batched_cross_entropy_loss(logits, true_labels)
 assert_all_close(actual, expected)
+
+
+
+### (I1) collect rows
+def collect_rows(matrix: Tensor, row_indexes: Tensor) -> Tensor:
+    """Return a 2D matrix whose rows are taken from the input matrix in order according to row_indexes.
+
+    matrix: shape (m, n)
+    row_indexes: shape (k,). Each value is an integer in [0..m).
+
+    Return: shape (k, n). out[i] is matrix[row_indexes[i]].
+    """
+    assert row_indexes.max() < matrix.shape[0]
+    return matrix[row_indexes]
+
+matrix = t.arange(15).view((5, 3))
+row_indexes = t.tensor([0, 2, 1, 0])
+actual = collect_rows(matrix, row_indexes)
+expected = t.tensor([[0, 1, 2], [6, 7, 8], [3, 4, 5], [0, 1, 2]])
+assert_all_equal(actual, expected)
+
+
+### (I2) collect columns
+def collect_columns(matrix: Tensor, column_indexes: Tensor) -> Tensor:
+    """Return a 2D matrix whose columns are taken from the input matrix in order according to column_indexes.
+
+    matrix: shape (m, n)
+    column_indexes: shape (k,). Each value is an integer in [0..n).
+
+    Return: shape (m, k). out[:, i] is matrix[:, column_indexes[i]].
+    """
+    assert column_indexes.max() < matrix.shape[1]
+    return matrix[:, column_indexes]
+
+matrix = t.arange(15).view((5, 3))
+column_indexes = t.tensor([0, 2, 1, 0])
+actual = collect_columns(matrix, column_indexes)
+expected = t.tensor([[0, 2, 1, 0], [3, 5, 4, 3], [6, 8, 7, 6], [9, 11, 10, 9], [12, 14, 13, 12]])
+assert_all_equal(actual, expected)
