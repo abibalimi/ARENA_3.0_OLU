@@ -39,3 +39,36 @@ Debugging, with VSCode's built-in run & debug features"""
 
 
 # 1️⃣ Rays & Segments
+## 1D Image Rendering
+
+## Exercise - implement make_rays_1d
+
+### Difficulty: 🔴🔴⚪⚪⚪
+### Importance: 🔵🔵🔵⚪⚪
+### You should spend up to 10-15 minutes on this exercise.
+def make_rays_1d(num_pixels: int, y_limit: float) -> Tensor:
+    """
+    num_pixels: The number of pixels in the y dimension. Since there is one ray per pixel, this is also the number of rays.
+    y_limit: At x=1, the rays should extend from -y_limit to +y_limit, inclusive of both endpoints.
+
+    Returns: shape (num_pixels, num_points=2, num_dim=3) where the num_points dimension contains (origin, direction) and the num_dim dimension contains xyz.
+
+    Example of make_rays_1d(9, 1.0): [
+        [[0, 0, 0], [1, -1.0, 0]],
+        [[0, 0, 0], [1, -0.75, 0]],
+        [[0, 0, 0], [1, -0.5, 0]],
+        ...
+        [[0, 0, 0], [1, 0.75, 0]],
+        [[0, 0, 0], [1, 1, 0]],
+    ]
+    """
+    rays = t.zeros((num_pixels, 2, 3), dtype=t.float32)
+    print(f'before : {rays}')
+    t.linspace(start=-y_limit, end=y_limit, steps=num_pixels, out=rays[:, 1, 1])
+    print(f'mid : {rays}')
+    rays[:, 1, 0] = 1
+    print(f'after : {rays}')
+    return rays
+
+rays1d = make_rays_1d(9, 10.0)
+fig = render_lines_with_plotly(rays1d)
