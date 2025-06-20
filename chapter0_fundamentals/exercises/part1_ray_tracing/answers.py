@@ -95,3 +95,37 @@ def update(v=0.0, seed=0):
 
 ### You should spend up to 20-25 minutes on this exercise.
 ### It involves some of today's core concepts - tensor manipulation, linear operations, etc.
+
+def intersect_ray_1d(ray: Float[Tensor, "points dims"], segment: Float[Tensor, "points dims"]) -> bool:
+    """
+    ray: shape (n_points=2, n_dim=3)  # O, D points
+    segment: shape (n_points=2, n_dim=3)  # L_1, L_2 points
+
+    Return True if the ray intersects the segment.
+    """
+    # Get only x and y coordinate while ignoring z
+    ray = ray[:, :2]
+    segment = segment[:, :2]
+    
+    # Ray is [[Ox, Oy], [Dx, Dy]]
+    O, D = ray
+    # Segment is [[L1x, L1y], [L2x, L2y]]
+    L_1, L_2 = segment
+    
+    # Create matrix and vector, and solve equation
+    mat = t.stack([D, L_1 - L_2], dim=-1)
+    vec = L_1 - O
+    
+    # Solve equation (return False if no solution)
+    try:
+        sol = t.linalg.solve(mat, vec)
+    except RuntimeError:
+        return False
+    
+    # If there is a solution, check the soln is in the correct range for there to be an intersection
+    u = sol[0].item()
+    v = sol[1].item()
+    return (u >= 0.0) and (v >= 0.0) and (v <= 1.0)
+
+tests.test_intersect_ray_1d(intersect_ray_1d)
+tests.test_intersect_ray_1d_special_case(intersect_ray_1d)
